@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flota de Transportes — Dashboard</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page-plane:     #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid-hairline:  #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --card-shadow:    0 1px 2px rgba(11,11,11,0.04), 0 1px 12px rgba(11,11,11,0.05);
+
+    --series-1: #2a78d6; /* Flota Principal */
+    --series-2: #eda100; /* Renting */
+    --series-3: #1baf7a; /* Remolques y Camabajas */
+    --series-4: #8355c9; /* Maquinas y Montacargas */
+    --series-5: #e87ba4; /* Vehiculos Personales */
+    --series-6: #d03b3b; /* Siniestrados */
+    --series-7: #74736c; /* Vendidos / De Baja */
+
+    --good: #0ca30c;
+    --warn: #c98500;
+    --critical: #d03b3b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page-plane:     #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid-hairline:  #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --card-shadow:    0 1px 2px rgba(0,0,0,0.3), 0 1px 12px rgba(0,0,0,0.3);
+
+      --series-1: #3987e5;
+      --series-2: #f0b13d;
+      --series-3: #22c98c;
+      --series-4: #a586e0;
+      --series-5: #d55181;
+      --series-6: #e66767;
+      --series-7: #9a9a94;
+
+      --good: #0ca30c;
+      --warn: #d99a2b;
+      --critical: #e66767;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page-plane:     #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid-hairline:  #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --card-shadow:    0 1px 2px rgba(0,0,0,0.3), 0 1px 12px rgba(0,0,0,0.3);
+
+    --series-1: #3987e5;
+    --series-2: #f0b13d;
+    --series-3: #22c98c;
+    --series-4: #a586e0;
+    --series-5: #d55181;
+    --series-6: #e66767;
+    --series-7: #9a9a94;
+
+    --good: #0ca30c;
+    --warn: #d99a2b;
+    --critical: #e66767;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page-plane);
+    color: var(--text-primary);
+  }
+  .viz-root { background: var(--page-plane); min-height: 100vh; padding-bottom: 48px; }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 32px; border-bottom: 1px solid var(--border);
+    background: var(--surface-1);
+  }
+  .topbar-left { display: flex; align-items: center; gap: 14px; }
+  .topbar-logo {
+    background: #ffffff; border-radius: 8px; padding: 6px 10px;
+    display: flex; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  }
+  .topbar-logo img { display: block; height: 28px; width: auto; }
+  .topbar h1 { font-size: 20px; margin: 0; font-weight: 700; }
+  .topbar .sub { color: var(--text-secondary); font-size: 13px; margin-top: 2px; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .theme-btn {
+    border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary);
+    border-radius: 8px; padding: 7px 12px; font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .theme-btn:hover { color: var(--text-primary); }
+  .conn-status { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-secondary); }
+  .conn-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); flex: none; }
+  .conn-dot.ok { background: var(--good); }
+  .conn-dot.busy { background: var(--warn); }
+  .conn-dot.err { background: var(--critical); }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 28px 32px 0; }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .kpi-tile {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px; box-shadow: var(--card-shadow); position: relative;
+  }
+  .kpi-label { font-size: 12.5px; color: var(--text-secondary); font-weight: 600; letter-spacing: .01em; }
+  .kpi-value { font-size: 30px; font-weight: 700; margin-top: 6px; line-height: 1.1; }
+  .kpi-note { font-size: 12px; color: var(--text-muted); margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .kpi-toggle-wrap { padding-right: 40px; }
+  .kpi-toggle-btn {
+    position: absolute; top: 14px; right: 14px; border: 1px solid var(--border); background: var(--page-plane);
+    color: var(--text-secondary); width: 26px; height: 26px; border-radius: 7px; cursor: pointer; font-size: 13px;
+    display: flex; align-items: center; justify-content: center; line-height: 1;
+  }
+  .kpi-toggle-btn:hover { color: var(--text-primary); }
+  .kpi-toggle-wrap .col-menu { right: 0; left: auto; top: calc(100% - 4px); width: 240px; }
+
+  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 22px; box-shadow: var(--card-shadow);
+  }
+  .card h2 { font-size: 14.5px; margin: 0 0 2px; font-weight: 700; }
+  .card .card-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+
+  .barlist { display: flex; flex-direction: column; gap: 14px; }
+  .bar-row { display: grid; grid-template-columns: 168px 1fr 100px; align-items: center; gap: 10px; }
+  .bar-label { font-size: 12.5px; color: var(--text-secondary); font-weight: 600; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-track { position: relative; height: 22px; background: var(--grid-hairline); border-radius: 4px; overflow: hidden; }
+  .bar-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px 3px 3px 4px; min-width: 3px; }
+  .bar-value { font-size: 12.5px; color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--grid-hairline); }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .legend-swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+
+  .detail-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--card-shadow); }
+  .table-scroll { border-radius: 0 0 12px 12px; }
+  .detail-head { padding: 18px 22px 0; }
+  .detail-head h2 { font-size: 14.5px; margin: 0 0 2px; font-weight: 700; }
+  .detail-head .card-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
+
+  .controls { padding: 0 22px 16px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-bottom: 1px solid var(--grid-hairline); padding-bottom: 16px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tabs-label { font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; align-self: center; margin-right: 2px; }
+  .row-break { flex-basis: 100%; height: 0; }
+  .tab-clear {
+    border: 1px dashed var(--border); background: transparent; color: var(--text-muted);
+    padding: 6px 12px; border-radius: 999px; font-size: 12.5px; cursor: pointer; font-weight: 600;
+    margin-left: 2px;
+  }
+  .tab-clear:hover:not(:disabled) { color: var(--critical); border-color: var(--critical); }
+  .tab-clear:disabled { opacity: .35; cursor: default; }
+  .tab {
+    border: 1px solid var(--border); background: var(--page-plane); color: var(--text-secondary);
+    padding: 6px 12px; border-radius: 999px; font-size: 12.5px; cursor: pointer; font-weight: 600;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tab .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .tab.active { background: var(--text-primary); color: var(--surface-1); border-color: var(--text-primary); }
+  .tab.active .dot { outline: 2px solid var(--surface-1); }
+
+  .search-box { margin-left: auto; position: relative; }
+  .search-box input {
+    border: 1px solid var(--border); background: var(--page-plane); color: var(--text-primary);
+    border-radius: 8px; padding: 7px 12px 7px 30px; font-size: 13px; width: 220px;
+  }
+  .search-box svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+
+  .col-toggle-wrap { position: relative; }
+  .col-toggle-btn {
+    border: 1px solid var(--border); background: var(--page-plane); color: var(--text-secondary);
+    padding: 7px 12px; border-radius: 8px; font-size: 12.5px; cursor: pointer; font-weight: 600;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .col-menu {
+    display: none; position: absolute; left: 0; top: calc(100% + 6px); z-index: 20;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15); padding: 10px; width: 220px; max-height: 320px; overflow-y: auto;
+  }
+  .col-menu.open { display: block; }
+  .col-menu label { display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding: 5px 4px; color: var(--text-secondary); cursor: pointer; border-radius: 6px; }
+  .col-menu label:hover { background: var(--page-plane); }
+  .col-menu input { accent-color: var(--series-1); }
+
+  .table-scroll { overflow-x: auto; max-height: 560px; overflow-y: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+  thead th {
+    position: sticky; top: 0; background: var(--surface-1); z-index: 5;
+    text-align: left; padding: 10px 14px; font-size: 11px; text-transform: uppercase;
+    letter-spacing: .03em; color: var(--text-muted); font-weight: 700;
+    border-bottom: 1px solid var(--grid-hairline); cursor: pointer; white-space: nowrap;
+  }
+  thead th:hover { color: var(--text-primary); }
+  thead th .sort-arrow { opacity: .4; margin-left: 3px; font-size: 10px; }
+  tbody td { padding: 9px 14px; border-bottom: 1px solid var(--grid-hairline); color: var(--text-secondary); white-space: nowrap; }
+  tbody tr:hover td { background: var(--page-plane); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.model { color: var(--text-primary); font-weight: 600; }
+  td.specs, td.nota { white-space: normal; min-width: 220px; color: var(--text-muted); font-size: 12px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; white-space: nowrap;
+  }
+  .badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  .footer-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 22px; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--grid-hairline); }
+
+  .edit-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 22px; border-bottom: 1px solid var(--grid-hairline); background: var(--page-plane); }
+  .edit-hint { font-size: 11.5px; color: var(--text-muted); }
+  .row-status { font-size: 11.5px; margin-left: auto; display: flex; align-items: center; gap: 6px; color: var(--text-muted); }
+  .add-btn { border: 1px solid var(--border); border-radius: 8px; padding: 7px 14px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+  .add-btn { background: var(--good); color: #fff; border-color: var(--good); }
+  .add-btn:hover { filter: brightness(1.08); }
+  .add-btn:disabled { opacity: .5; cursor: default; }
+  .actions-col { width: 30px; text-align: center; padding: 6px !important; }
+  .del-btn { border: none; background: transparent; cursor: pointer; font-size: 13px; opacity: .45; padding: 2px; line-height: 1; }
+  .del-btn:hover { opacity: 1; }
+  tr.row-added td { background: color-mix(in srgb, var(--good) 9%, transparent); }
+
+  .editable-td { cursor: text; outline-offset: -2px; }
+  .editable-td:hover { outline: 1px dashed var(--baseline); background: color-mix(in srgb, var(--series-1) 5%, transparent); }
+  .editable-td:focus { outline: 2px solid var(--series-1); background: var(--surface-1); white-space: normal; }
+  select.cat-edit { font-size: 12.5px; font-family: inherit; color: inherit; background: var(--surface-1); border: 1px solid var(--border); border-radius: 6px; padding: 3px 6px; cursor: pointer; }
+
+  .empty-state { padding: 40px; text-align: center; color: var(--text-muted); font-size: 13px; }
+
+  @media (max-width: 900px) {
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .chart-row { grid-template-columns: 1fr; }
+  }
+
+  .page-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .page-tab {
+    border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary);
+    padding: 9px 16px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer;
+  }
+  .page-tab:hover { color: var(--text-primary); }
+  .page-tab.active { background: var(--text-primary); color: var(--surface-1); border-color: var(--text-primary); }
+  .page-tab-count { opacity: .75; font-weight: 600; margin-left: 2px; }
+  .page-section { display: none; }
+  .page-section.active { display: block; }
+
+  .kanban-board { display: flex; gap: 14px; padding: 18px 22px; overflow-x: auto; }
+  .kanban-col {
+    flex: 1 1 0; min-width: 230px; background: var(--page-plane); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px; min-height: 160px; transition: background .1s, outline .1s;
+  }
+  .kanban-col.drag-over { outline: 2px dashed var(--series-1); background: color-mix(in srgb, var(--series-1) 6%, var(--page-plane)); }
+  .kanban-col-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 0 2px; }
+  .kanban-col-title { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+  .kanban-count { font-size: 11.5px; font-weight: 700; color: var(--text-secondary); background: var(--surface-1); border: 1px solid var(--border); border-radius: 999px; padding: 1px 9px; }
+  .kanban-card {
+    background: var(--surface-1); border: 1px solid var(--border); border-left: 4px solid var(--baseline);
+    border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; cursor: grab; box-shadow: var(--card-shadow);
+  }
+  .kanban-card:active { cursor: grabbing; }
+  .kanban-card.dragging { opacity: .35; }
+  .kanban-card-top { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); margin-bottom: 5px; }
+  .kanban-card-title { font-size: 13.5px; font-weight: 700; margin-bottom: 6px; color: var(--text-primary); }
+  .kanban-card-line { font-size: 12px; color: var(--text-secondary); margin-bottom: 3px; line-height: 1.35; }
+  .kanban-card-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .kanban-card-btn { flex: 1; border: 1px solid var(--border); background: var(--page-plane); color: var(--text-secondary); border-radius: 6px; padding: 5px 8px; font-size: 11.5px; cursor: pointer; font-weight: 600; }
+  .kanban-card-btn:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+  .kanban-empty { padding: 22px 6px; text-align: center; color: var(--text-muted); font-size: 12px; }
+  @media (max-width: 900px) {
+    .kanban-board { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="viz-root">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div>
+        <h1>Flota de transportes</h1>
+        <div class="sub">Grupo Partequipos S.A.S. — año 2026, base de datos Supabase</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="conn-status"><span class="conn-dot" id="connDot"></span><span id="connLabel">Conectando…</span></div>
+      <button class="theme-btn" id="themeToggle" type="button">
+        <span id="themeIcon">🌙</span> <span id="themeLabel">Oscuro</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <div class="page-tabs">
+      <button class="page-tab active" id="pageTabFlota" type="button">🚚 Flota de vehiculos</button>
+      <button class="page-tab" id="pageTabMultas" type="button">🚨 Multas <span class="page-tab-count" id="multasTabCount">(0)</span></button>
+      <button class="page-tab" id="pageTabMovs" type="button">🔄 Movimientos <span class="page-tab-count" id="movsTabCount">(0)</span></button>
+    </div>
+
+    <div id="sectionFlota" class="page-section active">
+
+    <div class="kpi-row" id="kpiRow"></div>
+
+    <div class="chart-row">
+      <div class="card">
+        <h2>Vehiculos por categoria</h2>
+        <div class="card-sub" id="chartCountSub">Cantidad de unidades en cada categoria</div>
+        <div class="barlist" id="chartCount"></div>
+      </div>
+      <div class="card">
+        <h2>Valor comercial por categoria</h2>
+        <div class="card-sub" id="chartValueSub">Avaluo comercial (vr. ccial 2025-2026), en pesos COP</div>
+        <div class="barlist" id="chartValue"></div>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <div class="detail-head">
+        <h2>Detalle de flota</h2>
+        <div class="card-sub" id="flotaSub">Cargando… — combina categorias, filtra por estado de poliza, busca y muestra/oculta columnas</div>
+      </div>
+      <div class="controls">
+        <span class="tabs-label">Categoria:</span>
+        <div class="tabs" id="tabs"></div>
+        <div class="col-toggle-wrap">
+          <button class="col-toggle-btn" id="colToggleBtn" type="button">Columnas ▾</button>
+          <div class="col-menu" id="colMenu"></div>
+        </div>
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" placeholder="Buscar placa, marca, responsable...">
+        </div>
+        <div class="row-break"></div>
+        <span class="tabs-label">Empresa:</span>
+        <div class="tabs" id="propTabs"></div>
+      </div>
+      <div class="edit-bar">
+        <button class="add-btn" id="addBtn" type="button">+ Agregar vehiculo</button>
+        <span class="edit-hint">✎ Clic en una celda para editarla · 🗑 para eliminar una fila. Los cambios se guardan automaticamente en Supabase.</span>
+        <span class="row-status" id="statusFlota"></span>
+      </div>
+      <div class="table-scroll">
+        <table id="dataTable">
+          <thead><tr id="tableHead"></tr></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="footer-row">
+        <span id="rowCount"></span>
+      </div>
+    </div>
+
+    </div><!-- /sectionFlota -->
+
+    <div id="sectionMultas" class="page-section">
+
+      <div class="kpi-row" id="kpiRowMultas"></div>
+
+      <div class="detail-card">
+        <div class="detail-head">
+          <h2>Multas e infracciones</h2>
+          <div class="card-sub">Comparendos — cruzados por placa contra la flota de vehiculos</div>
+        </div>
+        <div class="controls">
+          <span class="tabs-label">Estado:</span>
+          <div class="tabs" id="multasEstadoTabs"></div>
+          <div class="col-toggle-wrap">
+            <button class="col-toggle-btn" id="colToggleBtnM" type="button">Columnas ▾</button>
+            <div class="col-menu" id="colMenuM"></div>
+          </div>
+          <div class="search-box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInputM" placeholder="Buscar placa, comparendo, organismo...">
+          </div>
+        </div>
+        <div class="edit-bar">
+          <button class="add-btn" id="addBtnM" type="button">+ Agregar multa</button>
+          <span class="edit-hint">✎ Clic en una celda para editarla · 🗑 para eliminar una fila. Los cambios se guardan automaticamente en Supabase.</span>
+          <span class="row-status" id="statusMultas"></span>
+        </div>
+        <div class="table-scroll">
+          <table id="dataTableM">
+            <thead><tr id="tableHeadM"></tr></thead>
+            <tbody id="tableBodyM"></tbody>
+          </table>
+        </div>
+        <div class="footer-row">
+          <span id="rowCountM"></span>
+        </div>
+      </div>
+
+    </div><!-- /sectionMultas -->
+
+    <div id="sectionMovs" class="page-section">
+
+      <div class="kpi-row" id="kpiRowMovs"></div>
+
+      <div class="detail-card">
+        <div class="detail-head">
+          <h2>Movimientos de vehiculos</h2>
+          <div class="card-sub">Que carro sale, cual entra en su lugar y que paso con el saliente</div>
+        </div>
+        <div class="controls">
+          <span class="tabs-label">Vista:</span>
+          <div class="tabs" id="movsViewTabs">
+            <button class="tab active" data-view="kanban" type="button">📋 Kanban</button>
+            <button class="tab" data-view="tabla" type="button">📑 Tabla</button>
+          </div>
+          <div class="col-toggle-wrap" id="movsColToggleWrap" style="display:none">
+            <button class="col-toggle-btn" id="colToggleBtnV" type="button">Columnas ▾</button>
+            <div class="col-menu" id="colMenuV"></div>
+          </div>
+          <div class="search-box" id="movsSearchWrap" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInputV" placeholder="Buscar placa, sede, responsable...">
+          </div>
+        </div>
+        <div class="edit-bar">
+          <button class="add-btn" id="addBtnV" type="button">+ Agregar movimiento</button>
+          <span class="edit-hint" id="movsEditHint">🖱️ Arrastra una tarjeta a otra columna para cambiar su estado.</span>
+          <span class="row-status" id="statusMovs"></span>
+        </div>
+
+        <div class="kanban-board" id="movsKanbanView"></div>
+
+        <div id="movsTablaView" style="display:none">
+          <div class="table-scroll">
+            <table id="dataTableV">
+              <thead><tr id="tableHeadV"></tr></thead>
+              <tbody id="tableBodyV"></tbody>
+            </table>
+          </div>
+          <div class="footer-row">
+            <span id="rowCountV"></span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /sectionMovs -->
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
