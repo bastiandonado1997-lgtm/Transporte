@@ -6,87 +6,107 @@
   <title>Informe Completo Q3 2026 – Partequipos Express</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
+    :root {
+      --brand: #128599; --brand-dk: #0B5F6E; --brand-xdk: #083F4A; --brand-lt: #4FAAB9; --brand-bg: #E6F3F5;
+      --ink: #14232B; --muted: #5F7179; --line: #D5E2E6; --bg: #F4F8F9; --card: #FFFFFF;
+      --good: #0F7A5A; --bad: #B23A3A; --warn: #C98A12; --accent: #F2A541;
+    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f5f4f0; color: #1a1a18; min-height: 100vh; }
-    nav { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 0.5px solid #d3d1c7; display: flex; align-items: center; padding: 0 2rem; height: 52px; gap: 0; overflow-x: auto; }
-    nav .brand { font-size: 14px; font-weight: 700; color: #0E8E8E; margin-right: 1.5rem; letter-spacing: -0.3px; white-space: nowrap; }
-    nav .brand span { color: #1a1a18; }
-    nav a { font-size: 13px; color: #888780; text-decoration: none; padding: 0 .9rem; height: 52px; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; white-space: nowrap; }
-    nav a:hover, nav a.active { color: #1AAFAF; border-color: #1AAFAF; }
-    .portada { background: linear-gradient(135deg, #1AAFAF 0%, #2C3E50 100%); padding: 4rem 2rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1rem; }
-    .portada .tag { font-size: 12px; font-weight: 600; letter-spacing: 2px; color: #1a1a18; text-transform: uppercase; }
-    .portada h1 { font-size: clamp(26px, 5vw, 50px); font-weight: 700; color: #fff; line-height: 1.1; }
-    .portada h1 span { color: #1a1a18; }
-    .portada p { font-size: 15px; color: rgba(255,255,255,0.6); }
+    body { font-family: 'Montserrat', 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+    nav { position: sticky; top: 0; z-index: 100; background: var(--brand-xdk); display: flex; align-items: center; padding: 0 2rem; height: 56px; overflow-x: auto; gap: 4px; }
+    nav .brand img { height: 34px !important; width: auto !important; border-radius: 6px !important; }
+    nav .brand { margin-right: 1.25rem; }
+    nav a { font-size: 13px; font-weight: 500; color: rgba(255,255,255,.65); text-decoration: none; padding: 0 .9rem; height: 56px; display: flex; align-items: center; border-bottom: 3px solid transparent; white-space: nowrap; transition: color .2s, border-color .2s; }
+    nav a:hover, nav a.active { color: #fff; border-color: var(--brand-lt); }
+    .pdf-btn { margin-left: auto; background: var(--brand); color: #fff; border: 1px solid var(--brand-lt); border-radius: 20px; padding: 7px 16px; font: 600 12px inherit; font-family: inherit; cursor: pointer; white-space: nowrap; }
+    .pdf-btn:hover { background: var(--brand-lt); }
+    .portada { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='104' viewBox='0 0 120 104'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.10' stroke-width='2'%3E%3Cpath d='M30 2 L58 18 L58 50 L30 66 L2 50 L2 18 Z'/%3E%3Cpath d='M90 54 L118 70 L118 102 L90 118 L62 102 L62 70 Z'/%3E%3C/g%3E%3C/svg%3E"), linear-gradient(135deg, var(--brand) 0%, var(--brand-dk) 60%, var(--brand-xdk) 100%); padding: 4.5rem 2rem 5rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1rem; }
+    .portada img { height: 150px !important; width: 150px !important; border-radius: 20px !important; box-shadow: 0 12px 40px rgba(0,0,0,.35) !important; }
+    .portada .tag { font-size: 12px; font-weight: 700; letter-spacing: 3px; color: var(--brand-lt); text-transform: uppercase; }
+    .portada h1 { font-size: clamp(28px, 5vw, 52px); font-weight: 800; color: #fff; line-height: 1.1; letter-spacing: -.5px; }
+    .portada h1 span { color: var(--accent); }
+    .portada p { font-size: 15px; color: rgba(255,255,255,0.75); }
     .portada .badges { display: flex; gap: 10px; margin-top: .5rem; flex-wrap: wrap; justify-content: center; }
-    .portada .badge { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 20px; padding: 5px 14px; font-size: 13px; }
-    section { max-width: 980px; margin: 0 auto; padding: 2.5rem 1.5rem; }
-    .sec-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 1.5rem; }
-    .sec-header .pill { color: #fff; border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 600; white-space: nowrap; margin-top: 3px; background: #1AAFAF; }
-    .sec-header .pill.slate { background: #3a3a38; }
-    .sec-header h2 { font-size: 20px; font-weight: 600; color: #1a1a18; }
-    .sec-header p { font-size: 13px; color: #888780; margin-top: 2px; }
-    .divider { border: none; border-top: 0.5px solid #d3d1c7; margin-bottom: 1.5rem; }
-    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
-    .metric-card { background: #eeecea; border-radius: 8px; padding: 1rem; }
-    .metric-card .label { font-size: 12px; color: #888780; margin-bottom: 4px; }
-    .metric-card .value { font-size: 22px; font-weight: 600; color: #1a1a18; }
-    .metric-card .value.green { color: #0f6e56; }
-    .metric-card .value.red   { color: #a32d2d; }
-    .metric-card .value.blue  { color: #2C3E50; }
-    .metric-card .value.purple{ color: #1AAFAF; }
-    .metric-card .sub { font-size: 11px; color: #b4b2a9; margin-top: 3px; }
+    .portada .badge { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: #fff; border-radius: 20px; padding: 6px 16px; font-size: 13px; font-weight: 500; }
+    section { max-width: 1040px; margin: 0 auto; padding: 2.75rem 1.5rem; }
+    .sec-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 1.25rem; }
+    .sec-header .pill { color: #fff; border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 700; white-space: nowrap; margin-top: 3px; background: var(--brand); }
+    .sec-header .pill.slate { background: var(--brand-xdk); }
+    .sec-header h2 { font-size: 22px; font-weight: 700; color: var(--ink); letter-spacing: -.3px; }
+    .sec-header p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .divider { border: none; border-top: 2px solid var(--brand-bg); margin-bottom: 1.5rem; }
+    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+    .metric-card { background: var(--card); border: 1px solid var(--line); border-top: 3px solid var(--brand); border-radius: 10px; padding: 1rem; }
+    .metric-card .label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 6px; }
+    .metric-card .value { font-size: 23px; font-weight: 700; color: var(--ink); }
+    .metric-card .value.green { color: var(--good); }
+    .metric-card .value.red { color: var(--bad); }
+    .metric-card .value.blue { color: var(--brand-dk); }
+    .metric-card .value.purple { color: var(--brand); }
+    .metric-card .sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
-    @media (max-width: 620px) { .row { grid-template-columns: 1fr; } }
-    .card { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px; padding: 1rem 1.25rem; }
-    .card-title { font-size: 13px; font-weight: 500; color: #888780; margin-bottom: 12px; }
-    .chart-wrap { position: relative; height: 200px; }
-    .legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: #888780; margin-bottom: 8px; }
-    .legend span { display: flex; align-items: center; gap: 4px; }
-    .legend-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
-    .brand-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
-    .brand-item { text-align: center; padding: 10px 6px; background: #eeecea; border-radius: 8px; }
-    .brand-item .num { font-size: 20px; font-weight: 500; color: #1a1a18; }
-    .brand-item .name { font-size: 11px; color: #888780; margin-top: 4px; }
+    @media (max-width: 680px) { .row { grid-template-columns: 1fr; } nav { padding: 0 1rem; } section { padding: 2rem 1rem; } .portada { padding: 3rem 1rem 3.5rem; } .portada img { height: 110px !important; width: 110px !important; } }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1.1rem 1.25rem; box-shadow: 0 1px 2px rgba(8,63,74,.04); }
+    .card-title { font-size: 13px; font-weight: 600; color: var(--brand-dk); margin-bottom: 12px; }
+    .chart-wrap { position: relative; height: 210px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .legend span { display: flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    thead tr { background: #1AAFAF; color: #fff; }
-    thead th { padding: 10px 14px; text-align: left; font-weight: 600; }
-    thead th:first-child { border-radius: 8px 0 0 0; }
-    thead th:last-child  { border-radius: 0 8px 0 0; }
-    .fin-head thead tr { background: #1AAFAF; }
-    .cmp-head thead tr { background: #3a3a38; }
-    tbody tr { border-bottom: 0.5px solid #eeecea; }
-    tbody td { padding: 10px 14px; }
+    thead tr { background: var(--brand); color: #fff; }
+    thead th { padding: 10px 14px; text-align: left; font-weight: 600; white-space: nowrap; }
+    thead th:first-child { border-radius: 8px 0 0 0; } thead th:last-child { border-radius: 0 8px 0 0; }
+    .cmp-head thead tr, thead tr[style] { background: var(--brand-xdk) !important; }
+    tbody tr { border-bottom: 1px solid #EDF3F5; }
+    tbody td { padding: 10px 14px; font-variant-numeric: tabular-nums; }
     tbody td:first-child { font-weight: 600; }
-    tbody tr:nth-child(even) { background: #f9f8f6; }
-    .total-row td { background: #1a1a18 !important; color: #fff !important; font-weight: 700 !important; }
-    .delta-up   { color: #0f6e56; font-size: 12px; font-weight: 600; }
-    .delta-down { color: #a32d2d; font-size: 12px; font-weight: 600; }
-    .cmp-q1 { color: #2C3E50; font-weight: 600; }
-    .cmp-q2 { color: #1AAFAF; font-weight: 600; }
-    footer { text-align: center; font-size: 12px; color: #b4b2a9; padding: 2rem 1rem 3rem; border-top: 0.5px solid #d3d1c7; margin-top: 1rem; }
+    tbody tr:nth-child(even) { background: #F8FBFC; }
+    .total-row td { background: var(--brand-xdk) !important; color: #fff !important; font-weight: 700 !important; }
+    .delta-up { color: var(--good); font-size: 12px; font-weight: 700; }
+    .delta-down { color: var(--bad); font-size: 12px; font-weight: 700; }
+    .cmp-q1 { color: var(--muted); font-weight: 600; }
+    .cmp-q2 { color: var(--brand); font-weight: 700; }
+    footer { text-align: center; font-size: 12px; color: rgba(255,255,255,.6); padding: 2rem 1rem; background: var(--brand-xdk); margin-top: 1rem; }
     .accordion { display: flex; flex-direction: column; gap: 8px; }
-    .acc-item { border: 0.5px solid #d3d1c7; border-radius: 8px; overflow: hidden; }
-    .acc-trigger { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 16px; background: #f9f8f6; border: none; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500; color: #1a1a18; transition: background .2s; }
-    .acc-trigger:hover { background: #eeecea; }
-    .acc-total { color: #1AAFAF; font-weight: 600; margin-left: auto; margin-right: 8px; }
-    .acc-icon { font-size: 11px; color: #888780; transition: transform .25s; }
+    .acc-item { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .acc-trigger { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 16px; background: #F8FBFC; border: none; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--ink); }
+    .acc-trigger:hover { background: var(--brand-bg); }
+    .acc-total { color: var(--brand); font-weight: 700; margin-left: auto; margin-right: 8px; }
+    .acc-icon { font-size: 11px; color: var(--muted); transition: transform .25s; }
     .acc-trigger.open .acc-icon { transform: rotate(180deg); }
-    .acc-body { display: none; padding: 0 16px 12px; }
-    .acc-body.open { display: block; }
+    .acc-body { display: none; padding: 0 16px 12px; } .acc-body.open { display: block; }
     .exp-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
-    .exp-table thead tr { background: #1AAFAF; color: #fff; }
-    .exp-table thead th { padding: 8px 12px; text-align: left; font-weight: 600; }
-    .exp-table thead th:first-child { border-radius: 6px 0 0 0; }
-    .exp-table thead th:last-child  { border-radius: 0 6px 0 0; text-align: right; }
-    .exp-table tbody tr { border-bottom: 0.5px solid #eeecea; }
-    .exp-table tbody td { padding: 8px 12px; }
-    .exp-table tbody td:last-child { text-align: right; }
-    .exp-total td { background: #1a1a18 !important; color: #fff !important; font-weight: 700 !important; }
-      .note { font-size: 12px; color: #888780; margin-top: 10px; line-height: 1.5; }
-    .num-r { text-align: right; }
-    @media (max-width: 620px) { nav { padding: 0 1rem; } section { padding: 2rem 1rem; } .portada { padding: 3rem 1rem; } }
+    .exp-table thead th { padding: 8px 12px; }
+    .exp-table thead th:last-child { text-align: right; }
+    .exp-table tbody td { padding: 8px 12px; } .exp-table tbody td:last-child { text-align: right; }
+    .exp-total td { background: var(--brand-xdk) !important; color: #fff !important; font-weight: 700 !important; }
+    .note { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+    /* nuevo: resumen ejecutivo */
+    .exec { margin-top: -3rem; position: relative; z-index: 2; padding-top: 0; }
+    .exec .card { border-top: 4px solid var(--accent); padding: 1.5rem 1.6rem; box-shadow: 0 10px 30px rgba(8,63,74,.12); }
+    .exec h2 { font-size: 18px; font-weight: 700; color: var(--brand-xdk); margin-bottom: 1rem; }
+    .exec ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 28px; }
+    .exec li { font-size: 13.5px; line-height: 1.55; padding-left: 26px; position: relative; color: var(--ink); }
+    .exec li::before { content: ''; position: absolute; left: 0; top: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--brand-bg); border: 4px solid var(--brand); }
+    .exec li.bad::before { border-color: var(--bad); background: #F7E3E3; }
+    .exec li.warn::before { border-color: var(--warn); background: #FBF0D9; }
+    .exec li b { color: var(--brand-xdk); }
+    @media (max-width: 680px) { .exec ul { grid-template-columns: 1fr; } }
+    .be-bar { position: relative; height: 34px; background: var(--brand-bg); border-radius: 8px; margin: 6px 0 4px; }
+    .be-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 8px; display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: 700; color: #fff; white-space: nowrap; }
+    .be-line { position: absolute; top: -6px; bottom: -6px; width: 0; border-left: 2px dashed var(--brand-xdk); }
+    .be-row { display: grid; grid-template-columns: 90px 1fr; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 13px; font-weight: 600; }
+    @media print {
+      nav, .pdf-btn { display: none !important; }
+      body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .card, .metric-card, tr { break-inside: avoid; }
+      .acc-body { display: block !important; }
+      .exec { margin-top: 1rem; }
+      section { padding: 1.25rem 0; }
+    }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -95,6 +115,8 @@
   <a href="#fin-q3">Financiero Q3</a>
   <a href="#cli-q3">Clientes Q3</a>
   <a href="#comparativo">Q2 vs Q3</a>
+  <a href="#acumulado">Acumulado 2026</a>
+  <button class="pdf-btn" onclick="window.print()">⬇ Descargar PDF</button>
 </nav>
 
 <div class="portada">
@@ -133,7 +155,7 @@
     </table>
   </div>
   <div class="card" style="margin-bottom:1.5rem;">
-    <div class="card-title">Desglose de gastos por mes &nbsp;<span style="font-size:11px;color:#1AAFAF;font-weight:600;">← clic para expandir</span></div>
+    <div class="card-title">Desglose de gastos por mes &nbsp;<span style="font-size:11px;color:var(--brand);font-weight:600;">← clic para expandir</span></div>
     <div class="accordion">
       <div class="acc-item">
         <button class="acc-trigger" onclick="toggleAcc(this)">
@@ -187,13 +209,24 @@
     <p class="note">Profesional Fee corresponde al salario de $3.084.095 COP convertido a USD con la tasa de cada mes.</p>
   </div>
 
+
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-title">Punto de equilibrio mensual — ventas necesarias para cubrir gastos</div>
+    <div class="metrics" style="margin-bottom:1rem;">
+      <div class="metric-card"><div class="label">Gastos fijos promedio</div><div class="value">$1.699</div><div class="sub">por mes en Q3</div></div>
+      <div class="metric-card"><div class="label">Margen bruto Q3</div><div class="value purple">25.8%</div></div>
+      <div class="metric-card"><div class="label">Ventas mínimas / mes</div><div class="value blue">$6.594</div><div class="sub">gastos ÷ margen bruto</div></div>
+    </div>
+    <div class="be-row"><span>Jul</span><div class="be-bar"><div class="be-fill" style="width:66.4%;background:var(--good);">$9.300</div><div class="be-line" style="left:47.1%;"></div></div></div><div class="be-row"><span>Ago</span><div class="be-bar"><div class="be-fill" style="width:90.6%;background:var(--good);">$12.679</div><div class="be-line" style="left:47.1%;"></div></div></div><div class="be-row"><span>Sep</span><div class="be-bar"><div class="be-fill" style="width:26.4%;background:var(--bad);">$3.696</div><div class="be-line" style="left:47.1%;"></div></div></div>
+    <p class="note">La línea punteada marca el punto de equilibrio ($6.594). Julio y agosto lo superaron; septiembre quedó $2.899 por debajo.</p>
+  </div>
   <div class="row">
     <div class="card">
       <div class="card-title">Ventas vs Costos — Q3</div>
       <div class="legend">
-        <span><span class="legend-dot" style="background:#1AAFAF"></span>Ventas</span>
-        <span><span class="legend-dot" style="background:#E24B4A"></span>Costos</span>
-        <span><span class="legend-dot" style="background:#1D9E75"></span>Ganancia bruta</span>
+        <span><span class="legend-dot" style="background:#128599"></span>Ventas</span>
+        <span><span class="legend-dot" style="background:#C9504F"></span>Costos</span>
+        <span><span class="legend-dot" style="background:#0F7A5A"></span>Ganancia bruta</span>
       </div>
       <div class="chart-wrap"><canvas id="q3MonthChart"></canvas></div>
     </div>
@@ -236,7 +269,7 @@
     </table>
   </div>
   <div class="card">
-    <div class="card-title">Facturas por mes &nbsp;<span style="font-size:11px;color:#1AAFAF;font-weight:600;">← clic para expandir</span></div>
+    <div class="card-title">Facturas por mes &nbsp;<span style="font-size:11px;color:var(--brand);font-weight:600;">← clic para expandir</span></div>
     <div class="accordion">
       <div class="acc-item">
         <button class="acc-trigger" onclick="toggleAcc(this)">
@@ -310,17 +343,17 @@
     <div class="card">
       <div class="card-title">Financiero — Q1 vs Q2 vs Q3</div>
       <div class="legend">
-        <span><span class="legend-dot" style="background:#b4b2a9"></span>Q1 2026</span>
-        <span><span class="legend-dot" style="background:#2C3E50"></span>Q2 2026</span>
-        <span><span class="legend-dot" style="background:#1AAFAF"></span>Q3 2026</span>
+        <span><span class="legend-dot" style="background:#9FC9D1"></span>Q1 2026</span>
+        <span><span class="legend-dot" style="background:#083F4A"></span>Q2 2026</span>
+        <span><span class="legend-dot" style="background:#128599"></span>Q3 2026</span>
       </div>
       <div class="chart-wrap"><canvas id="cmpFinBar"></canvas></div>
     </div>
     <div class="card">
       <div class="card-title">Márgenes por trimestre</div>
       <div class="legend">
-        <span><span class="legend-dot" style="background:#1AAFAF"></span>Margen bruto</span>
-        <span><span class="legend-dot" style="background:#1D9E75"></span>Margen neto</span>
+        <span><span class="legend-dot" style="background:#128599"></span>Margen bruto</span>
+        <span><span class="legend-dot" style="background:#0F7A5A"></span>Margen neto</span>
       </div>
       <div class="chart-wrap"><canvas id="cmpMargin"></canvas></div>
     </div>
@@ -329,25 +362,50 @@
   <div class="card">
     <div class="card-title">Evolución mensual — Q1, Q2 y Q3 (Ene – Sep 2026)</div>
     <div class="legend">
-      <span><span class="legend-dot" style="background:#0E8E8E"></span>Ventas</span>
-      <span><span class="legend-dot" style="background:#1D9E75"></span>Utilidad Neta</span>
+      <span><span class="legend-dot" style="background:#128599"></span>Ventas</span>
+      <span><span class="legend-dot" style="background:#0F7A5A"></span>Utilidad Neta</span>
     </div>
     <div class="chart-wrap" style="height:230px;"><canvas id="evolutionLine"></canvas></div>
+  </div>
+</section>
+
+
+<!-- ④ ACUMULADO -->
+<section id="acumulado">
+  <div class="sec-header">
+    <div class="pill slate">Acumulado 2026</div>
+    <div><h2>Enero – Septiembre 2026</h2><p>Tres trimestres cerrados</p></div>
+  </div>
+  <hr class="divider" />
+  <div class="metrics">
+    <div class="metric-card"><div class="label">Ventas acumuladas</div><div class="value purple">$133.521</div></div>
+    <div class="metric-card"><div class="label">Ganancia bruta</div><div class="value green">$35.665</div><div class="sub">Margen 26.7%</div></div>
+    <div class="metric-card"><div class="label">Gastos acumulados</div><div class="value">$14.399</div></div>
+    <div class="metric-card"><div class="label">Utilidad neta</div><div class="value green">$21.266</div><div class="sub">Margen 15.9%</div></div>
+    <div class="metric-card"><div class="label">Aporte de Q2</div><div class="value blue">91%</div><div class="sub">de la utilidad del año</div></div>
+  </div>
+  <div class="card" style="overflow-x:auto;">
+    <div class="card-title">Resultado por trimestre</div>
+    <table>
+      <thead><tr><th>Trimestre</th><th>Ventas</th><th>Costos</th><th>Gan. bruta</th><th>Gastos</th><th>Utilidad neta</th><th>Margen neto</th></tr></thead>
+      <tbody><tr><td>Q1 2026</td><td>$43.041,91</td><td>$37.032,45</td><td>$6.009,46</td><td>$5.584,41</td><td>$425,05</td><td>1.0%</td></tr><tr><td>Q2 2026</td><td>$64.805,55</td><td>$41.763,84</td><td>$23.041,71</td><td>$3.718,25</td><td>$19.323,46</td><td>29.8%</td></tr><tr><td>Q3 2026</td><td>$25.673,88</td><td>$19.060,53</td><td>$6.613,35</td><td>$5.095,93</td><td>$1.517,41</td><td>5.9%</td></tr><tr class="total-row"><td>Ene – Sep</td><td>$133.521,34</td><td>$97.856,82</td><td>$35.664,52</td><td>$14.398,59</td><td>$21.265,92</td><td>15.9%</td></tr></tbody>
+    </table>
   </div>
 </section>
 
 <footer>Partequipos Express &nbsp;·&nbsp; Informe Q3 2026 &amp; Comparativa Q2 vs Q3 &nbsp;·&nbsp; Generado Octubre 2026</footer>
 
 <script>
-const g = 'rgba(0,0,0,0.05)', l = '#888780';
+const g = 'rgba(8,63,74,0.06)', l = '#5F7179';
+Chart.defaults.font.family = "'Montserrat','Segoe UI',system-ui,sans-serif";
 const fmt = v => '$' + v.toLocaleString();
 const base = {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}};
 
 new Chart(document.getElementById('q3MonthChart'), {
   type:'bar', data:{ labels:['Julio','Agosto','Septiembre'], datasets:[
-    {label:'Ventas',         data:[9299.56, 12678.6, 3695.72], backgroundColor:'#1AAFAF', borderWidth:0},
-    {label:'Costos',         data:[6139.0, 9876.94, 3044.59], backgroundColor:'#E24B4A', borderWidth:0},
-    {label:'Ganancia Bruta', data:[3160.56, 2801.66, 651.13],  backgroundColor:'#1D9E75', borderWidth:0}
+    {label:'Ventas',         data:[9299.56, 12678.6, 3695.72], backgroundColor:'#128599', borderWidth:0},
+    {label:'Costos',         data:[6139.0, 9876.94, 3044.59], backgroundColor:'#C9504F', borderWidth:0},
+    {label:'Ganancia Bruta', data:[3160.56, 2801.66, 651.13],  backgroundColor:'#0F7A5A', borderWidth:0}
   ]},
   options:{...base, scales:{x:{grid:{color:g},ticks:{color:l,font:{size:11}}},y:{grid:{color:g},ticks:{color:l,font:{size:11},callback:fmt}}}}
 });
@@ -355,36 +413,36 @@ new Chart(document.getElementById('q3MonthChart'), {
 const net = [1526.54, 865.84, -874.97];
 new Chart(document.getElementById('q3NetChart'), {
   type:'bar', data:{ labels:['Julio','Agosto','Septiembre'], datasets:[{
-    data:net, backgroundColor:net.map(v=>v>=0?'#1D9E75':'#E24B4A'), borderWidth:0
+    data:net, backgroundColor:net.map(v=>v>=0?'#0F7A5A':'#C9504F'), borderWidth:0
   }]},
   options:{...base, scales:{x:{grid:{color:g},ticks:{color:l,font:{size:11}}},y:{grid:{color:g},ticks:{color:l,font:{size:11},callback:fmt}}}}
 });
 
 const cliLabels = ["Susana Yamileth Vasquez", "Ferrexport", "Javier Louda Antuan", "Manuel Mayorga", "Johangel Rodriguez", "Ana Del Carmen Mendez", "Marco Orozco", "Diego Mayorga"];
 new Chart(document.getElementById('q3CliChart'), {
-  type:'bar', data:{ labels:cliLabels, datasets:[{ data:[6546.66, 4883.5, 2578.38, 1760.15, 1690.0, 1584.64, 1527.03, 1482.98], backgroundColor:'#1AAFAF', borderWidth:0 }]},
+  type:'bar', data:{ labels:cliLabels, datasets:[{ data:[6546.66, 4883.5, 2578.38, 1760.15, 1690.0, 1584.64, 1527.03, 1482.98], backgroundColor:'#128599', borderWidth:0 }]},
   options:{...base, indexAxis:'y', scales:{x:{grid:{color:g},ticks:{color:l,font:{size:11},callback:fmt}},y:{grid:{display:false},ticks:{color:l,font:{size:10}}}}}
 });
 
 const cliMg = [17.7, 43.7, 25.2, 22.4, 24.4, 16.4, 28.9, 16.6];
 new Chart(document.getElementById('q3CliMargin'), {
-  type:'bar', data:{ labels:cliLabels, datasets:[{ data:cliMg, backgroundColor:cliMg.map(v=>v>=25.8?'#1D9E75':'#EF9F27'), borderWidth:0 }]},
+  type:'bar', data:{ labels:cliLabels, datasets:[{ data:cliMg, backgroundColor:cliMg.map(v=>v>=25.8?'#0F7A5A':'#F2A541'), borderWidth:0 }]},
   options:{...base, indexAxis:'y', scales:{x:{grid:{color:g},ticks:{color:l,font:{size:11},callback:v=>v+'%'}},y:{grid:{display:false},ticks:{color:l,font:{size:10}}}}}
 });
 
 new Chart(document.getElementById('cmpFinBar'), {
   type:'bar', data:{ labels:['Ventas','Costos','Gan. Bruta','Gastos','Util. Neta'], datasets:[
-    {label:'Q1 2026', data:[43041.91, 37032.45, 6009.46, 5584.41, 425.05], backgroundColor:'#b4b2a9', borderWidth:0},
-    {label:'Q2 2026', data:[64805.55, 41763.84, 23041.71, 3718.25, 19323.46], backgroundColor:'#2C3E50', borderWidth:0},
-    {label:'Q3 2026', data:[25673.88, 19060.53, 6613.35, 5095.93, 1517.41],  backgroundColor:'#1AAFAF', borderWidth:0}
+    {label:'Q1 2026', data:[43041.91, 37032.45, 6009.46, 5584.41, 425.05], backgroundColor:'#9FC9D1', borderWidth:0},
+    {label:'Q2 2026', data:[64805.55, 41763.84, 23041.71, 3718.25, 19323.46], backgroundColor:'#083F4A', borderWidth:0},
+    {label:'Q3 2026', data:[25673.88, 19060.53, 6613.35, 5095.93, 1517.41],  backgroundColor:'#128599', borderWidth:0}
   ]},
   options:{...base, scales:{x:{grid:{color:g},ticks:{color:l,font:{size:10}}},y:{grid:{color:g},ticks:{color:l,font:{size:11},callback:fmt}}}}
 });
 
 new Chart(document.getElementById('cmpMargin'), {
   type:'bar', data:{ labels:['Q1 2026','Q2 2026','Q3 2026'], datasets:[
-    {label:'Margen bruto', data:[14.0, 35.6, 25.8], backgroundColor:'#1AAFAF', borderWidth:0},
-    {label:'Margen neto',  data:[1.0, 29.8, 5.9], backgroundColor:'#1D9E75', borderWidth:0}
+    {label:'Margen bruto', data:[14.0, 35.6, 25.8], backgroundColor:'#128599', borderWidth:0},
+    {label:'Margen neto',  data:[1.0, 29.8, 5.9], backgroundColor:'#0F7A5A', borderWidth:0}
   ]},
   options:{...base, scales:{x:{grid:{color:g},ticks:{color:l,font:{size:11}}},y:{grid:{color:g},ticks:{color:l,font:{size:11},callback:v=>v+'%'},min:0,max:40}}}
 });
@@ -392,9 +450,9 @@ new Chart(document.getElementById('cmpMargin'), {
 new Chart(document.getElementById('evolutionLine'), {
   type:'line', data:{ labels:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep'], datasets:[
     {label:'Ventas', data:[21017.48, 6498.59, 15525.84, 16924.88, 14051.16, 33829.51, 9299.56, 12678.6, 3695.72],
-      borderColor:'#0E8E8E', backgroundColor:'rgba(26,58,140,0.08)', fill:true, tension:.4, borderWidth:2, pointRadius:4, pointBackgroundColor:'#2C3E50'},
+      borderColor:'#128599', backgroundColor:'rgba(18,133,153,0.10)', fill:true, tension:.4, borderWidth:2, pointRadius:4, pointBackgroundColor:'#083F4A'},
     {label:'Utilidad Neta', data:[248.59, -425.19, 601.65, 2557.78, -361.63, 17127.31, 1526.54, 865.84, -874.97],
-      borderColor:'#1D9E75', backgroundColor:'rgba(29,158,117,0.08)', fill:true, tension:.4, borderWidth:2, pointRadius:4, pointBackgroundColor:'#1D9E75'}
+      borderColor:'#0F7A5A', backgroundColor:'rgba(29,158,117,0.08)', fill:true, tension:.4, borderWidth:2, pointRadius:4, pointBackgroundColor:'#0F7A5A'}
   ]},
   options:{...base, scales:{x:{grid:{color:g},ticks:{color:l,font:{size:11}}},y:{grid:{color:g},ticks:{color:l,font:{size:11},callback:fmt}}}}
 });
