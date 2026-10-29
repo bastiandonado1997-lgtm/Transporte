@@ -104,6 +104,27 @@
       .exec { margin-top: 1rem; }
       section { padding: 1.25rem 0; }
     }
+  
+    /* contraer / expandir */
+    .sec-header, .card-title { cursor: pointer; user-select: none; }
+    .sec-toggle { margin-left: auto; align-self: center; font-size: 12px; font-weight: 600; color: var(--brand); background: var(--brand-bg); border-radius: 14px; padding: 4px 12px; white-space: nowrap; }
+    .card-title { display: flex; align-items: center; gap: 8px; }
+    .card-title .chev { margin-left: auto; font-size: 11px; color: var(--muted); transition: transform .25s; }
+    .card.collapsed .card-title .chev, section.sec-collapsed .sec-toggle .chev { transform: rotate(-90deg); display: inline-block; }
+    .chev { display: inline-block; transition: transform .25s; }
+    .card-summary { display: none; font-size: 13px; color: var(--ink); line-height: 1.6; padding: 10px 12px; background: var(--brand-bg); border-radius: 8px; }
+    .card-summary b { color: var(--brand-xdk); }
+    .card.collapsed .card-summary { display: block; }
+    .card.collapsed .chart-wrap, .card.collapsed .legend, .card.collapsed .accordion, .card.collapsed .be-row,
+    .card.collapsed .note, .card.collapsed tbody tr:not(.total-row):not(.keep) { display: none; }
+    .card.collapsed table + .card-summary, .card.collapsed .card-summary.after { margin-top: 10px; }
+    .card.collapsed .card-title { margin-bottom: 10px; }
+    section.sec-collapsed > :not(.sec-header):not(.divider):not(.keep-metrics) { display: none; }
+    section.sec-collapsed .keep-metrics { margin-bottom: 0; }
+    .toggle-all { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.35); border-radius: 20px; padding: 7px 14px; font: 600 12px inherit; font-family: inherit; cursor: pointer; white-space: nowrap; margin-left: auto; }
+    .toggle-all:hover { background: rgba(255,255,255,.1); }
+    .toggle-all + .pdf-btn { margin-left: 8px; }
+    @media print { .sec-toggle, .chev, .card-summary { display: none !important; } }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -116,6 +137,7 @@
   <a href="#cli-q3">Clientes Q3</a>
   <a href="#comparativo">Q2 vs Q3</a>
   <a href="#acumulado">Acumulado 2026</a>
+  <button class="toggle-all" id="toggleAll" onclick="toggleAll()">▴ Contraer todo</button>
   <button class="pdf-btn" onclick="window.print()">⬇ Descargar PDF</button>
 </nav>
 
@@ -467,6 +489,53 @@ window.addEventListener('scroll', () => {
   let current = '';
   document.querySelectorAll('section[id]').forEach(s => { if (window.scrollY >= s.offsetTop - 80) current = s.id; });
   links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+});
+
+// ── Contraer / expandir: siempre quedan visibles cifras principales, totales y resumen ──
+const SUMMARY = {
+  'Detalle mensual': 'Ventas <b>$25.673,88</b> · Utilidad neta <b>$1.517,41</b> (5,9% de utilidad neta)',
+  'Desglose de gastos': 'Total gastos Q3 <b>$5.095,93</b> — Jul $1.634,02 · Ago $1.935,81 · Sep $1.526,10',
+  'Punto de equilibrio': 'Mínimo <b>$6.594</b>/mes — Jul $9.300 ✓ · Ago $12.679 ✓ · Sep $3.696 ✗ (faltaron $2.899)',
+  'Ventas vs Costos': 'Ventas <b>$25.674</b> · Costos <b>$19.061</b> · Ganancia bruta <b>$6.613</b>',
+  'Utilidad neta por mes': 'Jul <b>$1.527</b> · Ago <b>$866</b> · Sep <b style="color:var(--bad)">−$875</b> · Total Q3 <b>$1.517</b>',
+  'Ventas por cliente': '#1 <b>Susana Yamileth Vasquez</b> $6.547 (25,5% de las ventas) · #2 Ferrexport $4.884 (19,0%)',
+  '% de utilidad bruta por cliente': 'Mayor: <b>Ferrexport 43,7%</b> · Menor: <b>Ana Del Carmen Mendez 16,4%</b> · Promedio Q3 25,8%',
+  'Detalle por cliente': '<b>19 clientes</b> en el trimestre — se muestran los 3 principales',
+  'Facturas por mes': '<b>29 facturas</b> (Jul 10 · Ago 13 · Sep 6) por <b>$25.673,88</b>',
+  'Financiero — Q1 vs Q2 vs Q3': 'Ventas: Q1 $43.042 · Q2 $64.806 · Q3 <b>$25.674</b> — Utilidad neta: Q1 $425 · Q2 $19.323 · Q3 <b>$1.517</b>',
+  '% de utilidad por trimestre': '% utilidad neta: Q1 1,0% · Q2 29,8% · Q3 <b>5,9%</b> — % utilidad bruta: Q1 14,0% · Q2 35,6% · Q3 <b>25,8%</b>',
+  'Evolución mensual': 'Ene–Sep: ventas <b>$133.521</b> · utilidad neta <b>$21.266</b> · mejor mes: junio ($33.830)'
+};
+document.querySelectorAll('.card').forEach(card => {
+  const t = card.querySelector('.card-title'); if (!t) return;
+  const chev = document.createElement('span'); chev.className = 'chev'; chev.textContent = '▼'; t.appendChild(chev);
+  const key = Object.keys(SUMMARY).find(k => t.textContent.trim().startsWith(k));
+  if (key) { const s = document.createElement('div'); s.className = 'card-summary'; s.innerHTML = SUMMARY[key]; card.appendChild(s); }
+  // filas que siempre quedan visibles: % de utilidad y los 3 primeros clientes
+  card.querySelectorAll('tbody tr').forEach((tr, i) => {
+    const first = tr.cells[0] ? tr.cells[0].textContent.trim() : '';
+    if (first.startsWith('%') || (t.textContent.includes('Detalle por cliente') && i < 3)) tr.classList.add('keep');
+  });
+  t.addEventListener('click', () => card.classList.toggle('collapsed'));
+});
+document.querySelectorAll('section[id]').forEach(sec => {
+  const hd = sec.querySelector('.sec-header'); if (!hd) return;
+  const m = sec.querySelector(':scope > .metrics'); if (m) m.classList.add('keep-metrics');
+  const b = document.createElement('span'); b.className = 'sec-toggle'; b.innerHTML = '<span class="chev">▼</span> Detalle';
+  hd.appendChild(b);
+  hd.addEventListener('click', () => sec.classList.toggle('sec-collapsed'));
+});
+let allCollapsed = false;
+function toggleAll() {
+  allCollapsed = !allCollapsed;
+  document.querySelectorAll('.card').forEach(c => { if (c.querySelector('.card-title')) c.classList.toggle('collapsed', allCollapsed); });
+  document.querySelectorAll('section[id]').forEach(s => s.classList.remove('sec-collapsed'));
+  document.getElementById('toggleAll').textContent = allCollapsed ? '▾ Expandir todo' : '▴ Contraer todo';
+}
+window.addEventListener('beforeprint', () => {
+  document.querySelectorAll('.collapsed').forEach(c => c.classList.remove('collapsed'));
+  document.querySelectorAll('.sec-collapsed').forEach(s => s.classList.remove('sec-collapsed'));
+  allCollapsed = false; document.getElementById('toggleAll').textContent = '▴ Contraer todo';
 });
 </script>
 </body>
